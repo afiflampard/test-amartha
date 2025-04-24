@@ -150,6 +150,17 @@ func (lsv LoanServiceController) LoanInvestment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "successfully Invested loan", "Data": responseLoanInvestment})
 }
 
+// @Summary      Disburse a loan
+// @Description  Disburse a loan by employee
+// @Tags         Loans
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        loan_disbursement formData string true "LoanDisbursementInput JSON"
+// @Param        signed_agreement_url formData file true "Signed Agreement File"
+// @Success      200  {object}  map[string]interface{}
+// @Failure      400  {object}  map[string]interface{}
+// @Router       /loan/disbursed [post]
+// @Security     BearerAuth
 func (lsv LoanServiceController) LoanDisbursement(c *gin.Context) {
 
 	var (

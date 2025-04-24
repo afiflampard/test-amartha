@@ -1,0 +1,54 @@
+basePath: /v1
+host: localhost:8000
+info:
+  contact:
+    email: you@example.com
+    name: Your Name
+  description: API Documentation for your Go Gin boilerplate
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Boilerplate API
+  version: "1.0"
+paths:
+  /loan/disbursed:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Disburse a loan by employee
+      parameters:
+      - description: LoanDisbursementInput JSON
+        in: formData
+        name: loan_disbursement
+        required: true
+        type: string
+      - description: Signed Agreement File
+        in: formData
+        name: signed_agreement_url
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Disburse a loan
+      tags:
+      - Loans
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

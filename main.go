@@ -2,6 +2,7 @@ package main
 
 import (
 	"boilerplate/db"
+	"boilerplate/docs"
 	"boilerplate/forms"
 	"fmt"
 	"log"
@@ -10,6 +11,8 @@ import (
 	"boilerplate/routes"
 
 	"github.com/gin-contrib/gzip"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -43,6 +46,23 @@ func RequestIDMiddleware() gin.HandlerFunc {
 	}
 }
 
+// @title           Boilerplate API
+// @version         1.0
+// @description     API Documentation for your Go Gin boilerplate
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   Your Name
+// @contact.email  you@example.com
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8000
+// @BasePath  /v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	if os.Getenv("ENV") == "PRODUCTION" {
 		gin.SetMode(gin.ReleaseMode)
@@ -54,6 +74,9 @@ func main() {
 	}
 
 	r := gin.Default()
+	docs.SwaggerInfo.BasePath = "/v1"
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	binding.Validator = new(forms.DefaultValidator)
 	db.Init()
 	r.Use(CORSMiddleware())
