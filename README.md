@@ -40,6 +40,7 @@ Loan management system with a state machine (Proposed → Approved → Invested 
 - **Auth**: JWT with Role-Based Middleware
 - **Architecture**: Monolithic Service
 - **API Documentation**: Swagger (OpenAPI)
+- **Notification** : Email smtp
 
 ---
 
