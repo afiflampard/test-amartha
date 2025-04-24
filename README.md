@@ -52,7 +52,9 @@ Loan management system with a state machine (Proposed → Approved → Invested 
 - `loan_repayments_summary`  
 - `loan_investor_returns`  
 
-ERD diagram available at `/docs/erd.png` (optional)
+ERD diagram
+
+![Screenshot from 2025-04-25 03-53-32](https://github.com/user-attachments/assets/169a4f1f-cace-4994-b425-f2c1b808edcf)
 
 ---
 
@@ -98,3 +100,6 @@ curl --location 'http://localhost:8000/v1/loan/disbursed' \
 
 
 ## Screenshoot Open API Swagger
+
+![Screenshot from 2025-04-25 03-52-00](https://github.com/user-attachments/assets/0db0e51d-4bbc-4346-804f-559494dcd716)
+
