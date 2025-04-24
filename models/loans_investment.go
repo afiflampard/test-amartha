@@ -9,8 +9,9 @@ import (
 type LoansInvestment struct {
 	ID           uuid.UUID `gorm:"column:id" json:"id"`
 	LoanID       uuid.UUID `gorm:"column:loan_id" json:"loan_id"`
+	Loan         Loans     `gorm:"foreignKey:LoanID;references:ID" json:"loan"`
 	InvestorID   uuid.UUID `gorm:"column:investor_id" json:"investor_id"`
-	InvestorUser User      `gorm:"foreignKey:id" json:"investor_user"`
+	InvestorUser User      `gorm:"foreignKey:InvestorID;references:ID" json:"investor_user"`
 	Amount       float64   `gorm:"column:amount" json:"amount"`
 	CreatedAt    time.Time `gorm:"created_at" json:"created_at"`
 	UpdatedAt    time.Time `gorm:"updated_at" json:"updated_at"`

@@ -17,8 +17,10 @@ type LoanServiceController struct {
 	Mutation models.LoanMutation
 }
 
-var loanServiceForm = new(forms.LoanForm)
-var loanInvestment = new(forms.InvestForm)
+var (
+	loanServiceForm = new(forms.LoanForm)
+	loanInvestment  = new(forms.InvestForm)
+)
 
 func NewLoanServiceMutation(db *gorm.DB) *LoanServiceController {
 	return &LoanServiceController{
@@ -144,4 +146,44 @@ func (lsv LoanServiceController) LoanInvestment(c *gin.Context) {
 	}
 	lsv.Mutation.Commit(ctx)
 	c.JSON(http.StatusOK, gin.H{"message": "successfully Invested loan", "Data": responseLoanInvestment})
+}
+
+func (lsv LoanServiceController) LoanDisbursement(c *gin.Context) {
+
+	var (
+		loanDisbursement forms.LoanDisbursementInput
+		ctx              = c.Request.Context()
+		userID           = c.GetString("user_id")
+	)
+	loanJsonDisbursementJson := c.PostForm("loan_disbursement")
+
+	if err := json.Unmarshal([]byte(loanJsonDisbursementJson), &loanDisbursement); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadGateway, gin.H{
+			"message": err,
+		})
+		return
+	}
+
+	file, err := c.FormFile("signed_agreement_url")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Agreement letter file is required"})
+		return
+	}
+
+	dst := fmt.Sprintf("uploads/%s", file.Filename)
+	if err := c.SaveUploadedFile(file, dst); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		return
+	}
+
+	responseDisbursedLoan, err := lsv.Mutation.DisbursementLoan(ctx, loanDisbursement, uuid.MustParse(userID), dst)
+	if err != nil {
+		lsv.Mutation.Rollback(ctx)
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": err,
+		})
+		return
+	}
+	lsv.Mutation.Commit(ctx)
+	c.JSON(http.StatusOK, gin.H{"message": "successfully disbursed loan", "Data": responseDisbursedLoan})
 }

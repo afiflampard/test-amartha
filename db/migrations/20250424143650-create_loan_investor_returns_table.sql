@@ -11,7 +11,7 @@ CREATE TABLE loan_investor_returns(
     "updated_at" timestamptz,
     PRIMARY KEY("id"),
     CONSTRAINT "fk_loan_investor_return_loan" FOREIGN KEY ("loan_id") REFERENCES "loans",
-    CONSTRAINT "unique_loan_investor" UNIQUE ("loan_id","investor_id")
+    CONSTRAINT "unique_loan_investor_returns" UNIQUE ("loan_id","investor_id")
 );
 
 

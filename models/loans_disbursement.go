@@ -20,3 +20,12 @@ type LoanDisbursement struct {
 func (ld LoanDisbursement) TableName() string {
 	return "loans_disbursement"
 }
+
+func (lrs *LoanDisbursement) CreateNewLoanDisbursement(employeeID uuid.UUID, filePath string) {
+	lrs.ID = uuid.New()
+	lrs.SignedAgreementUrl = filePath
+	lrs.DisbursedByEmployeeID = employeeID
+	lrs.DisbursedDate = time.Now()
+	lrs.CreatedAt = time.Now()
+	lrs.UpdatedAt = time.Now()
+}

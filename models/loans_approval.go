@@ -9,8 +9,9 @@ import (
 type LoansApproval struct {
 	ID                       uuid.UUID `gorm:"column:id" json:"id"`
 	LoanID                   uuid.UUID `gorm:"column:loan_id" json:"loan_id"`
+	Loan                     Loans     `gorm:"foreignKey:LoanID;references:ID" json:"loan"`
 	FieldValidatorEmployeeID uuid.UUID `gorm:"column:field_validator_employee_id" json:"field_validator_employee_id"`
-	FieldValidatorEmployee   User      `gorm:"foreignKey:FieldValidatorEmployeeID" json:"field_validator_employee"`
+	FieldValidatorEmployee   User      `gorm:"foreignKey:FieldValidatorEmployeeID;references:ID" json:"field_validator_employee"`
 	ProofPictureUrl          string    `gorm:"column:proof_picture_url" json:"proof_picture_url"`
 	ApprovalDate             time.Time `gorm:"column:approval_date" json:"approval_date"`
 	CreatedAt                time.Time `gorm:"column:created_at" json:"created_at"`

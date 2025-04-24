@@ -12,7 +12,7 @@ CREATE TABLE loans(
     "created_at" timestamptz NOT NULL DEFAULT now(),
     "updated_at" timestamptz,
     PRIMARY KEY("id"),
-    CONSTRAINT "fk_loan_user" FOREIGN KEY ("borrower_id") REFERENCES "users"
+    CONSTRAINT "fk_loan_user" FOREIGN KEY ("borrower_id") REFERENCES "users",
     CONSTRAINT "fk_loan_employee" FOREIGN KEY ("employee_id") REFERENCES "users"
 );
 

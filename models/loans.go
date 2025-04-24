@@ -25,9 +25,9 @@ type Loans struct {
 	Roi                 float32            `gorm:"column:roi" json:"roi"`
 	AgreementLetterLink string             `gorm:"column:agreement_letter_link" json:"agreement_letter_link"`
 	Status              string             `gorm:"column:status" json:"status"`
-	LoanApproval        *LoansApproval     `gorm:"foreignKey:loan_id" json:"loan_approval"`
-	LoansInvestment     []*LoansInvestment `gorm:"foreignKey:loan_id" json:"loan_investment"`
-	LoanDisbursement    *LoansInvestment   `gorm:"foreignKey:loan_id" json:"loan_disbursement"`
+	LoanApproval        *LoansApproval     `gorm:"foreignKey:LoanID;references:ID" json:"loan_approval"`
+	LoansInvestment     []*LoansInvestment `gorm:"foreignKey:LoanID;references:ID" json:"loan_investment"`
+	LoanDisbursement    *LoanDisbursement  `gorm:"foreignKey:LoanID;references:ID" json:"loan_disbursement"`
 	CreatedAt           time.Time          `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt           time.Time          `gorm:"column:updated_at" json:"updated_at"`
 }

@@ -16,6 +16,7 @@ type LoanMutation interface {
 	GetAllLoans(ctx context.Context, status []string) ([]Loans, error)
 	GetLoansByID(ctx context.Context, id uuid.UUID) (Loans, error)
 	CreateLoanInvestment(ctx context.Context, forms forms.InvestFormInput, userID uuid.UUID) (*uuid.UUID, error)
+	DisbursementLoan(ctx context.Context, forms forms.LoanDisbursementInput, userID uuid.UUID, filePath string) (*uuid.UUID, error)
 
 	Commit(ctx context.Context) error
 	Rollback(ctx context.Context) error
@@ -33,7 +34,6 @@ func NewGormMutation(ctx context.Context, db *gorm.DB) LoanMutation {
 	}
 }
 
-// ApprovedLoan implements LoanMutation.
 func (g *gormMutation) ApprovedLoan(ctx context.Context, loanID uuid.UUID, userApprovedID uuid.UUID, filepath string) (*uuid.UUID, error) {
 	var (
 		loan         Loans
@@ -57,7 +57,6 @@ func (g *gormMutation) ApprovedLoan(ctx context.Context, loanID uuid.UUID, userA
 	return &approvalLoan.ID, nil
 }
 
-// CreateLoan implements LoanMutation.
 func (g *gormMutation) CreateLoan(ctx context.Context, forms forms.LoanFormInput, userID uuid.UUID, filePath string) (*uuid.UUID, error) {
 	var (
 		count int64
@@ -131,6 +130,66 @@ func (g *gormMutation) CreateLoanInvestment(ctx context.Context, forms forms.Inv
 	}
 
 	return &loanInvestment.ID, nil
+}
+
+func (g *gormMutation) DisbursementLoan(ctx context.Context, forms forms.LoanDisbursementInput, userID uuid.UUID, filePath string) (*uuid.UUID, error) {
+	var (
+		loans                  Loans
+		disbursementLoan       LoanDisbursement
+		loanInvestorReturnList []LoanInvestorReturns
+		loanRepaymentSummary   LoanRepaymentsSummary
+		loanRepaymentsInput    LoanRepaymentsInput
+	)
+
+	if err := g.tx.Preload("LoansInvestment").First(&loans, forms.LoanID).Error; err != nil {
+		return nil, err
+	}
+
+	if loans.Status != LoanInvested {
+		return nil, fmt.Errorf("loan is not invested")
+	}
+
+	disbursementLoan.CreateNewLoanDisbursement(userID, filePath)
+	for _, investor := range loans.LoansInvestment {
+		loanReturnInput := LoanInvestorReturnsInput{
+			LoanID:         loans.ID,
+			InvestorID:     investor.InvestorID,
+			InvestedAmount: investor.Amount,
+			ReturnAmount:   (investor.Amount * (float64(loans.Roi) / 100)) + investor.Amount,
+			Interest:       (investor.Amount * (float64(loans.Roi) / 100)),
+		}
+		var loanInvestorReturn LoanInvestorReturns
+		loanInvestorReturn.CreateLoanInvestorReturns(loanReturnInput)
+		loanInvestorReturnList = append(loanInvestorReturnList, loanInvestorReturn)
+	}
+
+	loanRepaymentsInput = LoanRepaymentsInput{
+		LoanID:                 loans.ID,
+		TotalPayableByBorrower: (loans.PrincipalAmount*(float64(loans.Rate)/100) + loans.PrincipalAmount),
+		TotalInterest:          (loans.PrincipalAmount * (float64(loans.Rate) / 100)),
+	}
+
+	loanRepaymentSummary.CreateLoanRepaymentsSummary(loanRepaymentsInput)
+	loans.UpdateLoan(LoanDisbursed)
+
+	if err := g.tx.Create(&loanInvestorReturnList).Error; err != nil {
+		return nil, err
+	}
+
+	if err := g.tx.Create(&disbursementLoan).Error; err != nil {
+		return nil, err
+	}
+
+	if err := g.tx.Create(&loanRepaymentSummary).Error; err != nil {
+		return nil, err
+	}
+
+	if err := g.tx.Save(&loans).Error; err != nil {
+		return nil, err
+	}
+
+	return &disbursementLoan.ID, nil
+
 }
 
 func (g *gormMutation) Commit(ctx context.Context) error {
