@@ -9,7 +9,8 @@ CREATE TABLE loans_investment(
     "updated_at" timestamptz,
     PRIMARY KEY("id"),
     CONSTRAINT "fk_loans_investment_loans" FOREIGN KEY ("loan_id") REFERENCES "loans",
-    CONSTRAINT "fk_loans_investment_user" FOREIGN KEY ("investor_id") REFERENCES "users"
+    CONSTRAINT "fk_loans_investment_user" FOREIGN KEY ("investor_id") REFERENCES "users",
+    CONSTRAINT "unique_loan_investor" UNIQUE ("loan_id", "investor_id")
 );
 
 -- +migrate Down
