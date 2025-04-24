@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"boilerplate/domain"
 	"boilerplate/forms"
-	"boilerplate/models"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,7 +14,7 @@ import (
 )
 
 type LoanServiceController struct {
-	Mutation models.LoanMutation
+	Mutation domain.LoanMutation
 }
 
 var (
@@ -24,7 +24,7 @@ var (
 
 func NewLoanServiceMutation(db *gorm.DB) *LoanServiceController {
 	return &LoanServiceController{
-		Mutation: models.NewGormMutation(context.Background(), db),
+		Mutation: domain.NewGormMutation(context.Background(), db),
 	}
 }
 

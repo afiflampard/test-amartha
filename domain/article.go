@@ -1,4 +1,4 @@
-package models
+package domain
 
 import (
 	"boilerplate/db"
@@ -67,7 +67,7 @@ func (m ArticleModel) Update(userID int64, id int64, form forms.CreateArticleFor
 	return err
 }
 
-//Delete ...
+// Delete ...
 func (m ArticleModel) Delete(userID, id int64) (err error) {
 
 	if err := db.GetDB().Delete(&Article{}, id).Error; err != nil {

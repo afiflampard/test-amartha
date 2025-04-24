@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"boilerplate/domain"
 	"boilerplate/forms"
-	"boilerplate/models"
 	"context"
 	"net/http"
 
@@ -11,14 +11,14 @@ import (
 )
 
 type UserServiceController struct {
-	Mutation models.UserMutation
+	Mutation domain.UserMutation
 }
 
 var userForm = new(forms.UserForm)
 
 func NewUserServiceMutation(db *gorm.DB) *UserServiceController {
 	return &UserServiceController{
-		Mutation: models.NewGormMutationUser(context.Background(), db),
+		Mutation: domain.NewGormMutationUser(context.Background(), db),
 	}
 }
 
