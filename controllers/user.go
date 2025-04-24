@@ -4,7 +4,6 @@ import (
 	"boilerplate/forms"
 	"boilerplate/models"
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -59,7 +58,7 @@ func (ctrl UserServiceController) Register(c *gin.Context) {
 		})
 		return
 	}
-	log.Println(registerForm)
+
 	user, err := ctrl.Mutation.Register(ctx, registerForm)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{
@@ -70,6 +69,6 @@ func (ctrl UserServiceController) Register(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Successfully registered",
-		"user":    user,
+		"Data":    user.ID,
 	})
 }
