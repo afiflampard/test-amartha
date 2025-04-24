@@ -18,6 +18,10 @@ type LoanApprovedInput struct {
 	LoanID uuid.UUID `form:"loan_id" json:"loan_id"`
 }
 
+type LoanStatusInput struct {
+	Status []string `form:"status" json:"status" binding:"required"`
+}
+
 func (f LoanForm) ValidateRateAndRoi(rate, roi float32) error {
 	if rate > 100 || rate < 0 {
 		return fmt.Errorf("rate must be between 0 and 100, got %.2f", rate)

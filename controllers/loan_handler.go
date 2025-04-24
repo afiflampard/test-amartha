@@ -187,3 +187,40 @@ func (lsv LoanServiceController) LoanDisbursement(c *gin.Context) {
 	lsv.Mutation.Commit(ctx)
 	c.JSON(http.StatusOK, gin.H{"message": "successfully disbursed loan", "Data": responseDisbursedLoan})
 }
+
+func (lsv LoanServiceController) GetLoanByID(c *gin.Context) {
+	var (
+		idLoan = c.Param("id")
+		ctx    = c.Request.Context()
+	)
+
+	responseLoanByID, err := lsv.Mutation.GetLoansByID(ctx, uuid.MustParse(idLoan))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		lsv.Mutation.Rollback(ctx)
+		return
+	}
+	lsv.Mutation.Commit(ctx)
+	c.JSON(http.StatusOK, gin.H{"message": "successfully get loan", "Data": responseLoanByID})
+}
+
+func (lsv LoanServiceController) GetAllLoans(c *gin.Context) {
+	var (
+		ctx        = c.Request.Context()
+		loanStatus forms.LoanStatusInput
+	)
+
+	if err := c.ShouldBindJSON(&loanStatus); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err, "Data": nil})
+		return
+	}
+
+	responseGetAllLoans, err := lsv.Mutation.GetAllLoans(ctx, loanStatus.Status)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		lsv.Mutation.Rollback(ctx)
+		return
+	}
+	lsv.Mutation.Commit(ctx)
+	c.JSON(http.StatusOK, gin.H{"message": "successfully get loan", "Data": responseGetAllLoans})
+}
