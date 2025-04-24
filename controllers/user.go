@@ -3,7 +3,6 @@ package controllers
 import (
 	"boilerplate/domain"
 	"boilerplate/forms"
-	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,14 +10,14 @@ import (
 )
 
 type UserServiceController struct {
-	Mutation domain.UserMutation
+	DB *gorm.DB
 }
 
 var userForm = new(forms.UserForm)
 
 func NewUserServiceMutation(db *gorm.DB) *UserServiceController {
 	return &UserServiceController{
-		Mutation: domain.NewGormMutationUser(context.Background(), db),
+		DB: db,
 	}
 }
 
@@ -35,8 +34,8 @@ func (ctrl UserServiceController) Login(c *gin.Context) {
 		})
 		return
 	}
-
-	user, token, err := ctrl.Mutation.Login(ctx, loginForm)
+	mutation := domain.NewGormMutationUser(ctx, ctrl.DB)
+	user, token, err := mutation.Login(ctx, loginForm)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{
 			"message": "Invalid Login Details",
@@ -58,15 +57,18 @@ func (ctrl UserServiceController) Register(c *gin.Context) {
 		})
 		return
 	}
+	mutation := domain.NewGormMutationUser(ctx, ctrl.DB)
 
-	user, err := ctrl.Mutation.Register(ctx, registerForm)
+	user, err := mutation.Register(ctx, registerForm)
 	if err != nil {
+		mutation.Rollback(ctx)
 		c.AbortWithStatusJSON(http.StatusNotAcceptable, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
+	mutation.Commit(ctx)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Successfully registered",
 		"Data":    user.ID,

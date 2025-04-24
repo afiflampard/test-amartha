@@ -2,6 +2,7 @@ package domain
 
 import (
 	"boilerplate/forms"
+	"boilerplate/helper"
 	"context"
 	"errors"
 	"fmt"
@@ -102,14 +103,17 @@ func (g *gormMutation) CreateLoanInvestment(ctx context.Context, forms forms.Inv
 		loan           Loans
 		firstPrice     = forms.Amount
 		loanInvestment LoansInvestment
+		user           User
 	)
+
 	if err := g.tx.Preload("LoansInvestment").First(&loan, forms.LoanID).Error; err != nil {
 		return nil, err
 	}
 
-	if loan.Status == LoanApproved || loan.Status == LoanDisbursed {
+	if loan.Status == LoanProposed || loan.Status == LoanDisbursed {
 		return nil, fmt.Errorf("loan is not proposed or invest")
 	}
+
 	for _, investmentLoan := range loan.LoansInvestment {
 		firstPrice += investmentLoan.Amount
 	}
@@ -121,13 +125,19 @@ func (g *gormMutation) CreateLoanInvestment(ctx context.Context, forms forms.Inv
 	loanInvestment.CreateLoansInvestment(loan, userID, forms.Amount)
 	loan.UpdateLoan(LoanInvested)
 
-	if err := g.tx.Create(&loanInvestment).Error; err != nil {
+	if err := g.tx.First(&user, userID).Error; err != nil {
+		return nil, fmt.Errorf("error get User %s", err)
+	}
+
+	if err := g.tx.Debug().Create(&loanInvestment).Error; err != nil {
 		return nil, err
 	}
 
-	if err := g.tx.Save(&loan).Error; err != nil {
+	if err := g.tx.Debug().Save(&loan).Error; err != nil {
 		return nil, err
 	}
+
+	helper.SendEmail(user.Email, "Investment", "Congrats Invest successfully")
 
 	return &loanInvestment.ID, nil
 }
@@ -148,8 +158,8 @@ func (g *gormMutation) DisbursementLoan(ctx context.Context, forms forms.LoanDis
 	if loans.Status != LoanInvested {
 		return nil, fmt.Errorf("loan is not invested")
 	}
-
-	disbursementLoan.CreateNewLoanDisbursement(userID, filePath)
+	helper.PrintJSON(loans)
+	disbursementLoan.CreateNewLoanDisbursement(userID, loans.ID, filePath)
 	for _, investor := range loans.LoansInvestment {
 		loanReturnInput := LoanInvestorReturnsInput{
 			LoanID:         loans.ID,

@@ -1,6 +1,6 @@
 package forms
 
-import "github.com/twinj/uuid"
+import "github.com/google/uuid"
 
 type LoanDisbursementForm struct{}
 

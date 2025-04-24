@@ -3,9 +3,9 @@ package controllers
 import (
 	"boilerplate/domain"
 	"boilerplate/forms"
-	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ import (
 )
 
 type LoanServiceController struct {
-	Mutation domain.LoanMutation
+	DB *gorm.DB
 }
 
 var (
@@ -24,7 +24,7 @@ var (
 
 func NewLoanServiceMutation(db *gorm.DB) *LoanServiceController {
 	return &LoanServiceController{
-		Mutation: domain.NewGormMutation(context.Background(), db),
+		DB: db,
 	}
 }
 
@@ -59,17 +59,17 @@ func (lsv LoanServiceController) Loans(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 		return
 	}
-
-	responseModel, err := lsv.Mutation.CreateLoan(ctx, loanForm, uuid.MustParse(userID), dst)
+	mutation := domain.NewGormMutation(ctx, lsv.DB)
+	responseModel, err := mutation.CreateLoan(ctx, loanForm, uuid.MustParse(userID), dst)
 	if err != nil {
-		lsv.Mutation.Rollback(ctx)
+		mutation.Rollback(ctx)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": err,
 		})
 		return
 	}
 
-	lsv.Mutation.Commit(ctx)
+	mutation.Commit(ctx)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully create Loan ", "Data": responseModel})
 
@@ -102,15 +102,17 @@ func (lsv LoanServiceController) ApprovedByEmployee(c *gin.Context) {
 		return
 	}
 
-	responseApprovedLoan, err := lsv.Mutation.ApprovedLoan(ctx, loanApproved.LoanID, uuid.MustParse(userID), dst)
+	mutation := domain.NewGormMutation(ctx, lsv.DB)
+
+	responseApprovedLoan, err := mutation.ApprovedLoan(ctx, loanApproved.LoanID, uuid.MustParse(userID), dst)
 	if err != nil {
-		lsv.Mutation.Rollback(ctx)
+		mutation.Rollback(ctx)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": err,
 		})
 		return
 	}
-	lsv.Mutation.Commit(ctx)
+	mutation.Commit(ctx)
 	c.JSON(http.StatusOK, gin.H{"message": "successfully approved loan", "Data": responseApprovedLoan})
 
 }
@@ -129,22 +131,22 @@ func (lsv LoanServiceController) LoanInvestment(c *gin.Context) {
 		})
 		return
 	}
-
+	log.Println("loan input ", loanInvestmentInput)
 	err := loanInvestment.ValidateAmount(loanInvestmentInput.Amount)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Agreement letter file is required"})
 		return
 	}
-
-	responseLoanInvestment, err := lsv.Mutation.CreateLoanInvestment(ctx, loanInvestmentInput, uuid.MustParse(userID))
+	mutation := domain.NewGormMutation(ctx, lsv.DB)
+	responseLoanInvestment, err := mutation.CreateLoanInvestment(ctx, loanInvestmentInput, uuid.MustParse(userID))
 	if err != nil {
-		lsv.Mutation.Rollback(ctx)
+		mutation.Rollback(ctx)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": err,
 		})
 		return
 	}
-	lsv.Mutation.Commit(ctx)
+	mutation.Commit(ctx)
 	c.JSON(http.StatusOK, gin.H{"message": "successfully Invested loan", "Data": responseLoanInvestment})
 }
 
@@ -170,21 +172,24 @@ func (lsv LoanServiceController) LoanDisbursement(c *gin.Context) {
 		return
 	}
 
+	log.Println(loanDisbursement)
+
 	dst := fmt.Sprintf("uploads/%s", file.Filename)
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 		return
 	}
 
-	responseDisbursedLoan, err := lsv.Mutation.DisbursementLoan(ctx, loanDisbursement, uuid.MustParse(userID), dst)
+	mutation := domain.NewGormMutation(ctx, lsv.DB)
+	responseDisbursedLoan, err := mutation.DisbursementLoan(ctx, loanDisbursement, uuid.MustParse(userID), dst)
 	if err != nil {
-		lsv.Mutation.Rollback(ctx)
+		mutation.Rollback(ctx)
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": err,
 		})
 		return
 	}
-	lsv.Mutation.Commit(ctx)
+	mutation.Commit(ctx)
 	c.JSON(http.StatusOK, gin.H{"message": "successfully disbursed loan", "Data": responseDisbursedLoan})
 }
 
@@ -194,13 +199,15 @@ func (lsv LoanServiceController) GetLoanByID(c *gin.Context) {
 		ctx    = c.Request.Context()
 	)
 
-	responseLoanByID, err := lsv.Mutation.GetLoansByID(ctx, uuid.MustParse(idLoan))
+	mutation := domain.NewGormMutation(ctx, lsv.DB)
+
+	responseLoanByID, err := mutation.GetLoansByID(ctx, uuid.MustParse(idLoan))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		lsv.Mutation.Rollback(ctx)
+		mutation.Rollback(ctx)
 		return
 	}
-	lsv.Mutation.Commit(ctx)
+	mutation.Commit(ctx)
 	c.JSON(http.StatusOK, gin.H{"message": "successfully get loan", "Data": responseLoanByID})
 }
 
@@ -215,12 +222,13 @@ func (lsv LoanServiceController) GetAllLoans(c *gin.Context) {
 		return
 	}
 
-	responseGetAllLoans, err := lsv.Mutation.GetAllLoans(ctx, loanStatus.Status)
+	mutation := domain.NewGormMutation(ctx, lsv.DB)
+	responseGetAllLoans, err := mutation.GetAllLoans(ctx, loanStatus.Status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		lsv.Mutation.Rollback(ctx)
+		mutation.Rollback(ctx)
 		return
 	}
-	lsv.Mutation.Commit(ctx)
+	mutation.Commit(ctx)
 	c.JSON(http.StatusOK, gin.H{"message": "successfully get loan", "Data": responseGetAllLoans})
 }

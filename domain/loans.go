@@ -52,6 +52,6 @@ func (l *Loans) CreateLoan(form forms.LoanFormInput, userID uuid.UUID, filePath 
 }
 
 func (l *Loans) UpdateLoan(status string) {
-	l.Status = LoanApproved
+	l.Status = status
 	l.UpdatedAt = time.Now()
 }

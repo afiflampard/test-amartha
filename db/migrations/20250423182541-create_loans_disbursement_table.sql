@@ -5,6 +5,7 @@ CREATE TABLE loan_disbursement(
     "loan_id" uuid NOT NULL,
     "signed_agreement_url" text,
     "disbursed_by_employee_id" uuid NOT null,
+    "disbursed_date" timestamptz,
     "created_at" timestamptz DEFAULT now(),
     "updated_at" timestamptz,
     PRIMARY KEY("id"),
