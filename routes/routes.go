@@ -4,7 +4,6 @@ import (
 	"boilerplate/controllers"
 	"boilerplate/db"
 	"boilerplate/middleware"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,6 @@ func AuthorizeRoleMiddleware(requiredRole []string) gin.HandlerFunc {
 		role, exists := c.Get("role")
 		existingRole := false
 		for _, roleRequired := range requiredRole {
-			log.Println(roleRequired)
 			if role == roleRequired {
 				existingRole = true
 				break

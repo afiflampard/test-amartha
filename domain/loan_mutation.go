@@ -83,7 +83,7 @@ func (g *gormMutation) CreateLoan(ctx context.Context, forms forms.LoanFormInput
 
 func (g *gormMutation) GetAllLoans(ctx context.Context, status []string) ([]Loans, error) {
 	var loans []Loans
-	if err := g.tx.Where("status IN (?)", status).Find(&loans).Error; err != nil {
+	if err := g.tx.Where("status IN (?)", status).Preload("Borrow").Find(&loans).Error; err != nil {
 		return []Loans{}, err
 	}
 	return loans, nil
@@ -91,7 +91,7 @@ func (g *gormMutation) GetAllLoans(ctx context.Context, status []string) ([]Loan
 
 func (g *gormMutation) GetLoansByID(ctx context.Context, id uuid.UUID) (Loans, error) {
 	var loan Loans
-	if err := g.tx.First(&loan, id).Error; err != nil {
+	if err := g.tx.Preload("Borrow").First(&loan, id).Error; err != nil {
 		return Loans{}, err
 	}
 
