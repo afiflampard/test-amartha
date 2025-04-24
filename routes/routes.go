@@ -47,7 +47,8 @@ func Routes(router *gin.Engine) {
 		roleLoan.POST("/invested", middleware.AuthMiddleware(), AuthorizeRoleMiddleware([]string{"investor"}), loan.LoanInvestment)
 		roleLoan.POST("/disbursed", middleware.AuthMiddleware(), AuthorizeRoleMiddleware([]string{"employee"}), loan.LoanDisbursement)
 
-		roleLoan.GET("/")
+		roleLoan.GET("/loan-list", middleware.AuthMiddleware(), AuthorizeRoleMiddleware([]string{"borrower", "investor", "employee"}), loan.GetAllLoans)
+		roleLoan.GET("/:id", middleware.AuthMiddleware(), AuthorizeRoleMiddleware([]string{"borrower", "investor", "employee"}), loan.GetLoanByID)
 
 	}
 }
