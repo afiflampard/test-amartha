@@ -28,6 +28,18 @@ func NewLoanServiceMutation(db *gorm.DB) *LoanServiceController {
 	}
 }
 
+// Loans godoc
+// @Summary Create a new loan
+// @Description Create a loan request by borrower/investor/employee, including uploading agreement letter
+// @Tags Loan
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param loan formData string true "LoanFormInput JSON string"
+// @Param agreement_letter_link formData file true "Agreement Letter"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /loan/create [post]
 func (lsv LoanServiceController) Loans(c *gin.Context) {
 	loanJson := c.PostForm("loan")
 	var loanForm forms.LoanFormInput
@@ -75,6 +87,18 @@ func (lsv LoanServiceController) Loans(c *gin.Context) {
 
 }
 
+// ApprovedByEmployee godoc
+// @Summary Approve a loan by employee
+// @Description Employee approves a loan by uploading proof picture
+// @Tags Loan
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param loan_approved formData string true "LoanApprovedInput JSON string"
+// @Param proof_picture_url formData file true "Proof Picture File"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /loan/approved [post]
 func (lsv LoanServiceController) ApprovedByEmployee(c *gin.Context) {
 	var (
 		loanApproved forms.LoanApprovedInput
@@ -117,6 +141,17 @@ func (lsv LoanServiceController) ApprovedByEmployee(c *gin.Context) {
 
 }
 
+// LoanInvestment godoc
+// @Summary Make an investment to a loan
+// @Description Investor sends investment to loan
+// @Tags Loan
+// @Accept multipart/form-data
+// @Produce json
+// @Security BearerAuth
+// @Param loan_investment formData string true "InvestFormInput JSON string"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /loan/invested [post]
 func (lsv LoanServiceController) LoanInvestment(c *gin.Context) {
 	var (
 		loanInvestmentInput forms.InvestFormInput
@@ -204,6 +239,16 @@ func (lsv LoanServiceController) LoanDisbursement(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "successfully disbursed loan", "Data": responseDisbursedLoan})
 }
 
+// GetLoanByID godoc
+// @Summary Get a loan by ID
+// @Description Retrieve loan detail by its UUID
+// @Tags Loan
+// @Produce json
+// @Security BearerAuth
+// @Param id path string true "Loan UUID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /loan/{id} [get]
 func (lsv LoanServiceController) GetLoanByID(c *gin.Context) {
 	var (
 		idLoan = c.Param("id")
@@ -222,6 +267,17 @@ func (lsv LoanServiceController) GetLoanByID(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "successfully get loan", "Data": responseLoanByID})
 }
 
+// GetAllLoans godoc
+// @Summary Get all loans
+// @Description Retrieve all loans filtered by status
+// @Tags Loan
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param loanStatus body forms.LoanStatusInput true "Loan Status Filter"
+// @Success 200 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /loan/loan-list [post]
 func (lsv LoanServiceController) GetAllLoans(c *gin.Context) {
 	var (
 		ctx        = c.Request.Context()

@@ -1,4 +1,45 @@
 basePath: /v1
+definitions:
+  forms.LoanStatusInput:
+    properties:
+      status:
+        items:
+          type: string
+        type: array
+    required:
+    - status
+    type: object
+  forms.LoginForm:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  forms.RegisterForm:
+    properties:
+      email:
+        type: string
+      name:
+        maxLength: 20
+        minLength: 3
+        type: string
+      password:
+        maxLength: 50
+        minLength: 3
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
 host: localhost:8000
 info:
   contact:
@@ -12,6 +53,158 @@ info:
   title: Boilerplate API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return JWT token
+      parameters:
+      - description: Login Form
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/forms.LoginForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully logged in
+          schema:
+            additionalProperties: true
+            type: object
+        "406":
+          description: Invalid Login Details
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User login
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: Register Form
+        in: body
+        name: register
+        required: true
+        schema:
+          $ref: '#/definitions/forms.RegisterForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully registered
+          schema:
+            additionalProperties: true
+            type: object
+        "406":
+          description: Validation Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register a new user
+      tags:
+      - Auth
+  /loan/{id}:
+    get:
+      description: Retrieve loan detail by its UUID
+      parameters:
+      - description: Loan UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get a loan by ID
+      tags:
+      - Loan
+  /loan/approved:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Employee approves a loan by uploading proof picture
+      parameters:
+      - description: LoanApprovedInput JSON string
+        in: formData
+        name: loan_approved
+        required: true
+        type: string
+      - description: Proof Picture File
+        in: formData
+        name: proof_picture_url
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Approve a loan by employee
+      tags:
+      - Loan
+  /loan/create:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Create a loan request by borrower/investor/employee, including
+        uploading agreement letter
+      parameters:
+      - description: LoanFormInput JSON string
+        in: formData
+        name: loan
+        required: true
+        type: string
+      - description: Agreement Letter
+        in: formData
+        name: agreement_letter_link
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new loan
+      tags:
+      - Loan
   /loan/disbursed:
     post:
       consumes:
@@ -46,6 +239,65 @@ paths:
       summary: Disburse a loan
       tags:
       - Loans
+  /loan/invested:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Investor sends investment to loan
+      parameters:
+      - description: InvestFormInput JSON string
+        in: formData
+        name: loan_investment
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Make an investment to a loan
+      tags:
+      - Loan
+  /loan/loan-list:
+    post:
+      consumes:
+      - application/json
+      description: Retrieve all loans filtered by status
+      parameters:
+      - description: Loan Status Filter
+        in: body
+        name: loanStatus
+        required: true
+        schema:
+          $ref: '#/definitions/forms.LoanStatusInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all loans
+      tags:
+      - Loan
 securityDefinitions:
   BearerAuth:
     in: header

@@ -21,6 +21,16 @@ func NewUserServiceMutation(db *gorm.DB) *UserServiceController {
 	}
 }
 
+// Login godoc
+// @Summary User login
+// @Description Authenticate user and return JWT token
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param credentials body forms.LoginForm true "Login Form"
+// @Success 200 {object} map[string]interface{} "Successfully logged in"
+// @Failure 406 {object} map[string]interface{} "Invalid Login Details"
+// @Router /auth/login [post]
 func (ctrl UserServiceController) Login(c *gin.Context) {
 	var (
 		loginForm forms.LoginForm
@@ -45,6 +55,16 @@ func (ctrl UserServiceController) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully logged in", "user": user, "token": token})
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Description Create a new user account
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param register body forms.RegisterForm true "Register Form"
+// @Success 200 {object} map[string]interface{} "Successfully registered"
+// @Failure 406 {object} map[string]interface{} "Validation Error"
+// @Router /auth/register [post]
 func (ctrl UserServiceController) Register(c *gin.Context) {
 	var (
 		registerForm forms.RegisterForm
