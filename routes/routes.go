@@ -34,7 +34,7 @@ func Routes(router *gin.Engine) {
 
 	v1 := router.Group("/v1")
 	{
-		user := new(controllers.UserController)
+		user := controllers.NewUserServiceMutation(db.GetDB())
 
 		v1.POST("/user/login", user.Login)
 		v1.POST("/user/register", user.Register)
