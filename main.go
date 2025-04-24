@@ -51,11 +51,11 @@ func RequestIDMiddleware() gin.HandlerFunc {
 // @description     API Documentation for your Go Gin boilerplate
 // @termsOfService  http://swagger.io/terms/
 
-// @contact.name   Your Name
-// @contact.email  you@example.com
+// @contact.name   Afif Musyayyidin
+// @contact.email  musyayyidinafif32@gmail.com
 
-// @license.name  MIT
-// @license.url   https://opensource.org/licenses/MIT
+// @license.name  FIFA
+// @license.url   https://opensource.org/licenses/FIFA
 
 // @host      localhost:8000
 // @BasePath  /v1
