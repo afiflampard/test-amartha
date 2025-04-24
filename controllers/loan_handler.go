@@ -187,7 +187,7 @@ func (lsv LoanServiceController) LoanInvestment(c *gin.Context) {
 
 // @Summary      Disburse a loan
 // @Description  Disburse a loan by employee
-// @Tags         Loans
+// @Tags         Loan
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        loan_disbursement formData string true "LoanDisbursementInput JSON"

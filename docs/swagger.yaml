@@ -238,7 +238,7 @@ paths:
       - BearerAuth: []
       summary: Disburse a loan
       tags:
-      - Loans
+      - Loan
   /loan/invested:
     post:
       consumes:

@@ -226,7 +226,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Loans"
+                    "Loan"
                 ],
                 "summary": "Disburse a loan",
                 "parameters": [
